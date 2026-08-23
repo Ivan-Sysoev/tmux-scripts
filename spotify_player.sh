@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 export LC_ALL=en_US.UTF-8
 
+SCRIPT_DIR="$HOME/tmux"
+
 PLAY_ICON="▶"
 PAUSE_ICON="⏸"
 LIKED_ICON="💘"
@@ -20,25 +22,36 @@ api() {
   [[ $status == 2* ]]
 }
 
-command -v spotify_player &>/dev/null || exit 0
+is_liked() {
+  local id=$1 result
+  result=$(api "me/tracks/contains?ids=$id" | jq -r '.[0]' 2>/dev/null)
+  if [ "$result" != "true" ] && [ "$result" != "false" ]; then
+    spotify_player get key playback &>/dev/null
+    result=$(api "me/tracks/contains?ids=$id" | jq -r '.[0]' 2>/dev/null)
+  fi
+  [ "$result" = "true" ]
+}
 
-playback=$(api "me/player/currently-playing")
-if [ $? -ne 0 ]; then
-  spotify_player get key playback &>/dev/null
-  playback=$(api "me/player/currently-playing") || exit 0
-fi
+IFS=$'\n' state=($(osascript "$SCRIPT_DIR/get_current_state.applescript"))
+track_name=${state[3]}
+track_uri=${state[5]}
+player_state=${state[6]}
 
-track=$(jq -r '.item.id // empty' <<<"$playback" 2>/dev/null)
-if [ -z "$track" ]; then
+if [ -z "$track_uri" ]; then
   echo "$IDLE_ICON"
   exit 0
 fi
 
-if [ "$(api "me/tracks/contains?ids=$track" | jq -r '.[0]' 2>/dev/null)" = "true" ]; then
+if [ "$player_state" == "true" ]; then
+  play_icon="$PLAY_ICON"
+else
+  play_icon="$PAUSE_ICON"
+fi
+
+if is_liked "${track_uri##*:}"; then
   liked="$LIKED_ICON"
 else
   liked="$UNLIKED_ICON"
 fi
 
-jq -r --arg play "$PLAY_ICON" --arg pause "$PAUSE_ICON" --arg liked "$liked" '
-  (if .is_playing then $play else $pause end) + " " + .item.name + " " + $liked' <<<"$playback"
+echo "$play_icon $track_name $liked"

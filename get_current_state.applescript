@@ -7,6 +7,7 @@ if (get running of application "Spotify") then
     set track_info to track_info & name of current track & "\n"
     set track_info to track_info & album of current track & "\n"
     set track_info to track_info & id of current track & "\n"
+    set track_info to track_info & (player state is playing) & "\n"
     return track_info
   end tell
 else

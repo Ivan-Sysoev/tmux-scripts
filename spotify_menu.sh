@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+CURRENT_DIR="$(dirname "$SELF")"
 PATH="/usr/local/bin:$PATH:/usr/sbin"
 
 open_spotify() {
@@ -41,7 +42,7 @@ toggle_shuffle() {
 
 show_menu() {
   local arr=""
-  IFS=$'\n' arr=($(osascript "$HOME/.tmux/plugins/tmux-spotify/apple_scripts/get_current_state.applescript"))
+  IFS=$'\n' arr=($(osascript "$CURRENT_DIR/get_current_state.applescript"))
   local is_repeat_on=${arr[0]}
   local is_shuffle_on=${arr[1]}
   local artist=${arr[2]}
@@ -66,7 +67,7 @@ show_menu() {
 
   if [ "$id" == "" ]; then
     $(tmux display-menu -T "#[align=centre fg=green]Spotify" -x R -y P \
-        "Open Spotify"     o "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && open_spotify'" \
+        "Open Spotify"     o "run -b 'source \"$SELF\" && open_spotify'" \
         "" \
         "Close menu"       q "" \
     )
@@ -76,13 +77,13 @@ show_menu() {
         "-#[nodim]Episode: $track_name" "" "" \
         "-#[nodim]Podcast: $album"      "" "" \
         "" \
-		"Like"             n "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && like_track'" \
-		"Open Spotify"     o "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && open_spotify'" \
-		"Play/Pause"       p "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && toggle_play_pause'" \
-		"Previous"         b "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && previous_track'" \
-		"Next"             n "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && next_track'" \
-		"$repeating_label" r "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && toggle_repeat $is_repeat_on'" \
-		"$shuffling_label" s "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && toggle_shuffle $is_shuffle_on'" \
+		"Like"             Space "run -b 'source \"$SELF\" && like_track'" \
+		"Open Spotify"     o "run -b 'source \"$SELF\" && open_spotify'" \
+		"Play/Pause"       p "run -b 'source \"$SELF\" && toggle_play_pause'" \
+		"Previous"         h "run -b 'source \"$SELF\" && previous_track'" \
+		"Next"             l "run -b 'source \"$SELF\" && next_track'" \
+		"$repeating_label" r "run -b 'source \"$SELF\" && toggle_repeat $is_repeat_on'" \
+		"$shuffling_label" s "run -b 'source \"$SELF\" && toggle_shuffle $is_shuffle_on'" \
 		"Copy URL"         c "run -b 'printf \"%s\" $id | pbcopy'" \
         "" \
         "Close menu"       q "" \
@@ -94,13 +95,13 @@ show_menu() {
         "-#[nodim]Artist: $artist"    "" "" \
         "-#[nodim]Album: $album"      "" "" \
         "" \
-		"Like"             l "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && like_track'" \
-		"Open Spotify"     o "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && open_spotify'" \
-		"Play/Pause"       p "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && toggle_play_pause'" \
-		"Previous"         b "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && previous_track'" \
-		"Next"             n "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && next_track'" \
-		"$repeating_label" r "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && toggle_repeat $is_repeat_on'" \
-		"$shuffling_label" s "run -b 'source \"$CURRENT_DIR/spotify_menu.sh\" && toggle_shuffle $is_shuffle_on'" \
+		"Like"             Space "run -b 'source \"$SELF\" && like_track'" \
+		"Open Spotify"     o "run -b 'source \"$SELF\" && open_spotify'" \
+		"Play/Pause"       p "run -b 'source \"$SELF\" && toggle_play_pause'" \
+		"Previous"         h "run -b 'source \"$SELF\" && previous_track'" \
+		"Next"             l "run -b 'source \"$SELF\" && next_track'" \
+		"$repeating_label" r "run -b 'source \"$SELF\" && toggle_repeat $is_repeat_on'" \
+		"$shuffling_label" s "run -b 'source \"$SELF\" && toggle_shuffle $is_shuffle_on'" \
 		"Copy URL"         c "run -b 'printf \"%s\" $id | pbcopy'" \
         "" \
         "Close menu"       q "" \
