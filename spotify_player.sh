@@ -54,4 +54,10 @@ else
   liked="$UNLIKED_ICON"
 fi
 
+MAX_LEN=32
+if [ ${#track_name} -gt $MAX_LEN ]; then
+  track_name="${track_name:0:$((MAX_LEN - 1))}"
+  track_name="${track_name% }…"
+fi
+
 echo "$play_icon $track_name $liked"
